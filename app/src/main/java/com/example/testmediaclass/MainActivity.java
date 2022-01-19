@@ -1,5 +1,7 @@
 package com.example.testmediaclass;
 
+import static android.content.ContentValues.TAG;
+
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
@@ -19,6 +21,7 @@ import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.os.Looper;
 import android.provider.Settings;
+import android.util.Log;
 import android.view.animation.Animation;
 import android.view.animation.RotateAnimation;
 import android.widget.ImageView;
@@ -62,8 +65,8 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     TextView destLocTextView;
     int PERMISSION_ID = 44;
 
-    String destString = "destination." +
-            "120.9 //// 23.321";
+    ///generate destination
+    Location dest = getDest();
 
 
     @Override
@@ -85,12 +88,16 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
         latitudeTextView =(TextView) findViewById(R.id.latTextView);
         longitudeTextView =(TextView)findViewById(R.id.lonTextView);
-        destLocTextView = (TextView) findViewById(R.id.dest);
+        destLocTextView = (TextView) findViewById(R.id.distance);
 
         mFusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
 
         // method to get the location
         getLastLocation();
+
+
+
+
 
     }
 
@@ -121,11 +128,11 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         //connecting media player to degrees from north
         player.setVolume(degree/1000,degree/1000);
 
-        //update location on create
+        //dynamic update location
         getLastLocation();
 
         //display destination text
-        destLocTextView.setText(destString);
+
 
 
 
@@ -174,6 +181,10 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                             requestNewLocationData();
                             latitudeTextView.setText(location.getLatitude() + "");
                             longitudeTextView.setText(location.getLongitude() + "");
+
+                            //.--dynamic distance update text -...////
+                            destLocTextView.setText((float) getDistance(location, dest)+"");
+
                         }
                     }
                 });
@@ -251,8 +262,25 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
             }
         }
     }
+    ///create dummy destination that sits in for server call for dest
+    //return destination
+    private Location getDest(){
 
+        Location destination = new Location("destination");
+        destination.setLatitude(44.4859900);
+        destination.setLongitude(-73.2137600);
+        return destination;
 
+    }
+
+    //get distance from dest
+    private float getDistance(Location current, Location destination){
+
+        float distance = current.distanceTo(destination);
+        Log.d(TAG, "getDistance: " + distance);
+        return distance;
+
+    }
 
 }
 
