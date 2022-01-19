@@ -58,8 +58,12 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     FusedLocationProviderClient mFusedLocationClient;
 
     // Initializing other items from layout file
-    TextView latitudeTextView, longitTextView;
+    TextView latitudeTextView, longitudeTextView;
+    TextView destLocTextView;
     int PERMISSION_ID = 44;
+
+    String destString = "destination." +
+            "120.9 //// 23.321";
 
 
     @Override
@@ -80,16 +84,13 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         //.----gps stuff -----..///
 
         latitudeTextView =(TextView) findViewById(R.id.latTextView);
-        longitTextView =(TextView)findViewById(R.id.lonTextView);
+        longitudeTextView =(TextView)findViewById(R.id.lonTextView);
+        destLocTextView = (TextView) findViewById(R.id.dest);
 
         mFusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
 
         // method to get the location
-        //getLastLocation();
-
-
-
-
+        getLastLocation();
 
     }
 
@@ -120,10 +121,11 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         //connecting media player to degrees from north
         player.setVolume(degree/1000,degree/1000);
 
-        //update location
+        //update location on create
         getLastLocation();
-//        latitudeTextView.setText(Float.toString());
-//        longitTextView.setText(Float.toString());
+
+        //display destination text
+        destLocTextView.setText(destString);
 
 
 
@@ -168,9 +170,10 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                         if (location == null) {
                             requestNewLocationData();
                         } else {
+                            //.-----dynamic location update text----.///
                             requestNewLocationData();
                             latitudeTextView.setText(location.getLatitude() + "");
-                            longitTextView.setText(location.getLongitude() + "");
+                            longitudeTextView.setText(location.getLongitude() + "");
                         }
                     }
                 });
@@ -209,7 +212,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         public void onLocationResult(LocationResult locationResult) {
             Location mLastLocation = locationResult.getLastLocation();
             latitudeTextView.setText("Latitude: " + mLastLocation.getLatitude() + "");
-            longitTextView.setText("Longitude: " + mLastLocation.getLongitude() + "");
+            longitudeTextView.setText("Longitude: " + mLastLocation.getLongitude() + "");
         }
     };
 
