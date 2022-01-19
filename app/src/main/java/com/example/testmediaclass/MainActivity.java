@@ -6,7 +6,6 @@ import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
-import android.media.Image;
 import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.view.animation.Animation;
@@ -14,7 +13,6 @@ import android.view.animation.RotateAnimation;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import org.w3c.dom.Text;
 
 import java.io.IOException;
 
@@ -45,7 +43,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         // initialize your android device sensor capabilities
         SensorManage = (SensorManager) getSystemService(SENSOR_SERVICE);
 
-        player = MediaPlayer.create(this, R.raw.sink_into_the_underground);
+        player = MediaPlayer.create(this, R.raw.the_waxen_pith);
         player.start();
 
 
@@ -71,7 +69,9 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         DegreeTV.setText("Heading: " + Float.toString(degree) + " degrees");
 
         //connecting mediaplayer to degrees from north
-        player.setVolume(degree/100,degree/100);
+        player.setVolume(degree/1000,degree/1000);
+
+
         // rotation animation - reverse turn degree degrees
         RotateAnimation ra = new RotateAnimation(
                 DegreeStart,
