@@ -79,13 +79,13 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
         //.----gps stuff -----..///
 
-        latitudeTextView = findViewById(R.id.latTextView);
-        longitTextView = findViewById(R.id.lonTextView);
+        latitudeTextView =(TextView) findViewById(R.id.latTextView);
+        longitTextView =(TextView)findViewById(R.id.lonTextView);
 
         mFusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
 
         // method to get the location
-        getLastLocation();
+        //getLastLocation();
 
 
 
@@ -119,6 +119,12 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
         //connecting media player to degrees from north
         player.setVolume(degree/1000,degree/1000);
+
+        //update location
+        getLastLocation();
+//        latitudeTextView.setText(Float.toString());
+//        longitTextView.setText(Float.toString());
+
 
 
         // rotation animation - reverse turn degree degrees
@@ -162,6 +168,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                         if (location == null) {
                             requestNewLocationData();
                         } else {
+                            requestNewLocationData();
                             latitudeTextView.setText(location.getLatitude() + "");
                             longitTextView.setText(location.getLongitude() + "");
                         }
