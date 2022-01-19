@@ -53,6 +53,8 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
     TextView DegreeTV;
 
+    //..--music guts--//
+
     MediaPlayer player;
 
     //.----gps guts-----.///
@@ -74,17 +76,18 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        //.---compass initialization w/sound----.///
+        //.---compass initialization----.///
         compassImage = (ImageView) findViewById(R.id.image);
         DegreeTV = (TextView) findViewById(R.id.DegreeTV);
 
         // initialize your android device sensor capabilities
         SensorManage = (SensorManager) getSystemService(SENSOR_SERVICE);
 
+        //..---init music guide ----.////
         player = MediaPlayer.create(this, R.raw.the_waxen_pith);
         player.start();
 
-        //.----gps stuff -----..///
+        //.----gps stuff initialization -----..///
 
         latitudeTextView =(TextView) findViewById(R.id.latTextView);
         longitudeTextView =(TextView)findViewById(R.id.lonTextView);
@@ -92,11 +95,9 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
         mFusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
 
-        // method to get the location
-        getLastLocation();
-
-
-
+        // method to get the current location
+        // not necessary in onCreate()
+        //getLastLocation();
 
 
     }
@@ -108,6 +109,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         // to stop the listener and save battery
         SensorManage.unregisterListener(this);
     }
+
     @Override
     protected void onResume() {
         super.onResume();
@@ -128,13 +130,8 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         //connecting media player to degrees from north
         player.setVolume(degree/1000,degree/1000);
 
-        //dynamic update location
+        //.----dynamic update location textview when sensor change (big deal method placement)---..///
         getLastLocation();
-
-        //display destination text
-
-
-
 
         // rotation animation - reverse turn degree degrees
         RotateAnimation ra = new RotateAnimation(
@@ -166,10 +163,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
             // check if location is enabled
             if (isLocationEnabled()) {
 
-                // getting last
-                // location from
-                // FusedLocationClient
-                // object
+                // getting last location from FusedLocationClient object
                 mFusedLocationClient.getLastLocation().addOnCompleteListener(new OnCompleteListener<Location>() {
                     @Override
                     public void onComplete(@NonNull Task<Location> task) {
@@ -203,8 +197,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     @SuppressLint("MissingPermission")
     private void requestNewLocationData() {
 
-        // Initializing LocationRequest
-        // object with appropriate methods
+        // Initializing LocationRequest object with appropriate methods
         LocationRequest mLocationRequest = new LocationRequest();
         mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
         mLocationRequest.setInterval(5);
@@ -231,9 +224,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     private boolean checkPermissions() {
         return ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED;
 
-        // If we want background location
-        // on Android 10.0 and higher,
-        // use:
+        // If we want background location on Android 10.0 and higher, use:
         // ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_BACKGROUND_LOCATION) == PackageManager.PERMISSION_GRANTED
     }
 
@@ -267,7 +258,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     private Location getDest(){
 
         Location destination = new Location("destination");
-        destination.setLatitude(44.4859900);
+        destination.setLatitude(44.4860100);
         destination.setLongitude(-73.2137600);
         return destination;
 
@@ -281,7 +272,6 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         return distance;
 
     }
-
 }
 
 
