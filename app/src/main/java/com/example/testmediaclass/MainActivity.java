@@ -51,7 +51,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
     private float DegreeStart = 0f;
 
-    TextView DegreeTV;
+    TextView headingTextView;
 
     //..--music guts--//
 
@@ -64,7 +64,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
     // Initializing other items from layout file
     TextView latitudeTextView, longitudeTextView;
-    TextView destLocTextView;
+    TextView distanceTextView, altitudeTextView;
     int PERMISSION_ID = 44;
 
     ///generate destination
@@ -78,7 +78,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
         //.---compass initialization----.///
         compassImage = (ImageView) findViewById(R.id.image);
-        DegreeTV = (TextView) findViewById(R.id.DegreeTV);
+        headingTextView = (TextView) findViewById(R.id.headingTextView);
 
         // initialize your android device sensor capabilities
         SensorManage = (SensorManager) getSystemService(SENSOR_SERVICE);
@@ -91,14 +91,14 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
         latitudeTextView =(TextView) findViewById(R.id.latTextView);
         longitudeTextView =(TextView)findViewById(R.id.lonTextView);
-        destLocTextView = (TextView) findViewById(R.id.distance);
+        distanceTextView = (TextView) findViewById(R.id.distanceTextView);
+
 
         mFusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
 
         // method to get the current location
         // not necessary in onCreate()
         //getLastLocation();
-
 
     }
 
@@ -125,7 +125,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     public void onSensorChanged(SensorEvent event) {
         // get angle around the z-axis rotated
         float degree = Math.round(event.values[0]);
-        DegreeTV.setText("Heading: " + Float.toString(degree) + " degrees");
+        headingTextView.setText("Heading: " + Float.toString(degree) + " degrees");
 
         //connecting media player to degrees from north
         player.setVolume(degree/1000,degree/1000);
@@ -171,13 +171,17 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                         if (location == null) {
                             requestNewLocationData();
                         } else {
+
                             //.-----dynamic location update text----.///
                             requestNewLocationData();
-                            latitudeTextView.setText(location.getLatitude() + "");
-                            longitudeTextView.setText(location.getLongitude() + "");
+                            latitudeTextView.setText("Latitude: " + location.getLatitude() + "");
+                            longitudeTextView.setText("Longitude: " + location.getLongitude() + "");
 
                             //.--dynamic distance update text -...////
-                            destLocTextView.setText((float) getDistance(location, dest)+"");
+                            distanceTextView.setText("Distance (m):" +(float) getDistance(location, dest)+"");
+                            //.--dynamic altitude update text --..////
+                            altitudeTextView.setText("altitude " + location.getAltitude() + "" );
+
 
                         }
                     }
@@ -258,6 +262,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     private Location getDest(){
 
         Location destination = new Location("destination");
+
         destination.setLatitude(44.4860100);
         destination.setLongitude(-73.2137600);
         return destination;
