@@ -43,31 +43,28 @@ import java.io.IOException;
 
 public class MainActivity extends AppCompatActivity implements SensorEventListener {
 
-    //.---compass guts----.////
+    //for something
+    int PERMISSION_ID = 44;
 
+    //init sensor
     private SensorManager SensorManage;
-
-    private ImageView compassImage;
-
-    private float DegreeStart = 0f;
-
-    TextView headingTextView;
-
-    //..--music guts--//
-
-    MediaPlayer player;
-
-    //.----gps guts-----.///
 
     // initializing FusedLocationProviderClient object
     FusedLocationProviderClient mFusedLocationClient;
 
-    // Initializing other items from layout file
+    // Initializing text views
+    TextView headingTextView;
     TextView latitudeTextView, longitudeTextView;
     TextView distanceTextView, altitudeTextView;
-    int PERMISSION_ID = 44;
 
-    ///generate destination
+    //init compass image view
+    private ImageView compassImage;
+    private float DegreeStart = 0f;
+
+    //..--init music player--//
+    MediaPlayer player;
+
+    ///init dummy destination
     Location dest = getDest();
 
 
@@ -76,29 +73,24 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        //.---compass initialization----.///
-        compassImage = (ImageView) findViewById(R.id.image);
-        headingTextView = (TextView) findViewById(R.id.headingTextView);
-
-        // initialize your android device sensor capabilities
+        // instance your android device sensor capabilities
         SensorManage = (SensorManager) getSystemService(SENSOR_SERVICE);
+        mFusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
 
-        //..---init music guide ----.////
-        player = MediaPlayer.create(this, R.raw.the_waxen_pith);
-        player.start();
 
-        //.----gps stuff initialization -----..///
-
+        //.----gps & compass textview instancing -----..///
+        headingTextView = (TextView) findViewById(R.id.headingTextView);
         latitudeTextView =(TextView) findViewById(R.id.latTextView);
         longitudeTextView =(TextView)findViewById(R.id.lonTextView);
         distanceTextView = (TextView) findViewById(R.id.distanceTextView);
+        altitudeTextView = (TextView) findViewById(R.id.altitudeTextView);
 
+        compassImage = (ImageView) findViewById(R.id.image);
 
-        mFusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
+        //..---instance music guide  + start playing music ----.////
+        player = MediaPlayer.create(this, R.raw.the_waxen_pith);
+        player.start();
 
-        // method to get the current location
-        // not necessary in onCreate()
-        //getLastLocation();
 
     }
 
@@ -130,6 +122,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         //connecting media player to degrees from north
         player.setVolume(degree/1000,degree/1000);
 
+        //.----add updates in here)---..///
         //.----dynamic update location textview when sensor change (big deal method placement)---..///
         getLastLocation();
 
@@ -172,14 +165,15 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                             requestNewLocationData();
                         } else {
 
-                            //.-----dynamic location update text----.///
                             requestNewLocationData();
+                            //.-----dynamic location update text----.///
                             latitudeTextView.setText("Latitude: " + location.getLatitude() + "");
                             longitudeTextView.setText("Longitude: " + location.getLongitude() + "");
 
                             //.--dynamic distance update text -...////
                             distanceTextView.setText("Distance (m):" +(float) getDistance(location, dest)+"");
                             //.--dynamic altitude update text --..////
+                            Log.d(TAG, "onComplete: " +location.getAltitude());
                             altitudeTextView.setText("altitude " + location.getAltitude() + "" );
 
 
