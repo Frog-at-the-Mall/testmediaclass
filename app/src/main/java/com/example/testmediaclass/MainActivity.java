@@ -116,13 +116,14 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
         mQueue = Volley.newRequestQueue(this);
 
+
+        //click button start request
         btn1.setOnClickListener(view -> {
             btn1.setEnabled(false);
             String secret = getString(R.string.getName);
-            Log.d(TAG, "onClick: clicky clicky" + secret);
+            Log.d(TAG, "onClick: clicky clicky");
 
             addRequest(secret, new Listener() {
-
                 @Override
                 public void response(String response) {
                     btn1.setEnabled(true);
@@ -134,7 +135,9 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         });
 
     }
-    //request method
+
+
+    //request method for button press
     private void addRequest(String url, final Listener listener) {
         final StringRequest stringRequest2 = new StringRequest(Request.Method.GET,url,new Response.Listener<String>() {
             @Override
@@ -182,9 +185,34 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
         //connecting media player to degrees from north
         //setting volume
-        //player.setVolume(degree/1000,degree/1000);
+        float leftVol = degree/1000;
+        float rightVol= degree /1000;
 
-        //
+        ///still has bugs facing forward
+        //facing forward
+        if(degree > 315 && degree < 45){
+            leftVol = 1;
+            rightVol = 1;
+        }
+        //facing left
+        if(degree < 315 && degree > 225){
+            leftVol = 0;
+            rightVol = 1;
+        }
+        //facing backwards
+        if(degree < 225 && degree > 135){
+            leftVol = 0;
+            rightVol = 0;
+        }
+        //facing right
+        if(degree < 135 && degree > 45){
+            leftVol = 1;
+            rightVol =0;
+        }
+
+        player.setVolume(leftVol,rightVol);
+        Log.d(TAG, "onSensorChanged: volume");
+
 
 
 
@@ -315,6 +343,10 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
             }
         }
     }
+
+
+
+
     ///create dummy destination that sits in for server call for dest
     //return destination
     private Location getDest(){
@@ -324,7 +356,6 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         destination.setLatitude(44.4860100);
         destination.setLongitude(-73.2137600);
         return destination;
-
     }
 
     //get distance from dest

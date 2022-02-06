@@ -43,6 +43,7 @@ public class Guide extends AppCompatActivity implements SensorEventListener {
     private static final String TAG = "tag";
     private SensorManager mSensorManager;
     private FusedLocationProviderClient mFusedLocationClient;
+    MediaPlayer player;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -54,7 +55,8 @@ public class Guide extends AppCompatActivity implements SensorEventListener {
         //google map
         mFusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
         //media player
-        MediaPlayer mp = new MediaPlayer();
+
+
 
     }
 
