@@ -18,17 +18,28 @@ import android.hardware.SensorManager;
 import android.location.Location;
 import android.location.LocationManager;
 import android.media.MediaPlayer;
+import android.nfc.Tag;
 import android.os.Bundle;
 import android.os.Looper;
 import android.provider.Settings;
+import android.renderscript.ScriptGroup;
 import android.util.Log;
+import android.util.LogPrinter;
+import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.RotateAnimation;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
 
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.StringRequest;
+import com.android.volley.toolbox.Volley;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationCallback;
 import com.google.android.gms.location.LocationRequest;
@@ -67,6 +78,12 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     ///init dummy destination
     Location dest = getDest();
 
+    //implementing volley
+    interface Listener{
+        void response(String string);
+    }
+    RequestQueue mQueue;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -92,8 +109,52 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         player.start();
 
 
+        //volley buttons + other stuff
+        final Button btn1 = (Button) findViewById(R.id.btn1);
+        final Button btn2 = (Button) findViewById(R.id.btn2);
+        final TextView textView = (TextView) findViewById(R.id.textView);
+
+        mQueue = Volley.newRequestQueue(this);
+
+        btn1.setOnClickListener(view -> {
+            btn1.setEnabled(false);
+            String secret = getString(R.string.getName);
+            Log.d(TAG, "onClick: clicky clicky" + secret);
+
+            addRequest(secret, new Listener() {
+
+                @Override
+                public void response(String response) {
+                    btn1.setEnabled(true);
+                    Log.d(TAG, "retrived response");
+                    textView.setText(response);
+                    btn1.setEnabled(true);
+                }
+            });
+        });
+
+    }
+    //request method
+    private void addRequest(String url, final Listener listener) {
+        final StringRequest stringRequest2 = new StringRequest(Request.Method.GET,url,new Response.Listener<String>() {
+            @Override
+            public void onResponse(String response) {
+                if (response != null) {
+                    listener.response(response);
+                }
+            }
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                Log.d(TAG, "onErrorResponse: errors at add request " + error);
+            }
+        });
+        mQueue.add(stringRequest2);
     }
 
+
+
+////////////////////////////////////////////////////////////////////////////
     //compass methods
     @Override
     protected void onPause() {
@@ -120,7 +181,12 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         headingTextView.setText("Heading: " + Float.toString(degree) + " degrees");
 
         //connecting media player to degrees from north
-        player.setVolume(degree/1000,degree/1000);
+        //setting volume
+        //player.setVolume(degree/1000,degree/1000);
+
+        //
+
+
 
         //.----add updates in here)---..///
         //.----dynamic update location textview when sensor change (big deal method placement)---..///
@@ -173,10 +239,8 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                             //.--dynamic distance update text -...////
                             distanceTextView.setText("Distance (m):" +(float) getDistance(location, dest)+"");
                             //.--dynamic altitude update text --..////
-                            Log.d(TAG, "onComplete: " +location.getAltitude());
                             altitudeTextView.setText("altitude " + location.getAltitude() + "" );
-
-
+                            
                         }
                     }
                 });
@@ -267,7 +331,6 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     private float getDistance(Location current, Location destination){
 
         float distance = current.distanceTo(destination);
-        Log.d(TAG, "getDistance: " + distance);
         return distance;
 
     }
