@@ -66,7 +66,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     // Initializing text views
     TextView headingTextView;
     TextView latitudeTextView, longitudeTextView;
-    TextView distanceTextView, altitudeTextView;
+    TextView relativeBearingTextView;
 
     //init compass image view
     private ImageView compassImage;
@@ -77,6 +77,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
     ///init dummy destination
     Location dest = getDest();
+
 
     //implementing volley
     interface Listener{
@@ -99,8 +100,8 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         headingTextView = (TextView) findViewById(R.id.headingTextView);
         latitudeTextView =(TextView) findViewById(R.id.latTextView);
         longitudeTextView =(TextView)findViewById(R.id.lonTextView);
-        distanceTextView = (TextView) findViewById(R.id.distanceTextView);
-        altitudeTextView = (TextView) findViewById(R.id.altitudeTextView);
+
+        relativeBearingTextView = (TextView) findViewById(R.id.relativeBearingTextView);
 
         compassImage = (ImageView) findViewById(R.id.image);
 
@@ -122,6 +123,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
             btn1.setEnabled(false);
             String secret = getString(R.string.getName);
             Log.d(TAG, "onClick: clicky clicky");
+
 
             addRequest(secret, new Listener() {
                 @Override
@@ -181,12 +183,16 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     public void onSensorChanged(SensorEvent event) {
         // get angle around the z-axis rotated
         float degree = Math.round(event.values[0]);
-        headingTextView.setText("Heading: " + Float.toString(degree) + " degrees");
+
+        headingTextView.setText("Heading: " + Float.toString(degree) + " degrees" );
+
+
+        ///get the bearing with Location.bearingTo(Loc dest)
 
         //connecting media player to degrees from north
         //setting volume
-        float leftVol = degree/1000;
-        float rightVol= degree /1000;
+        float leftVol = 0;
+        float rightVol= 0;
 
         ///still has bugs facing forward
         //facing forward
@@ -211,7 +217,9 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         }
 
         player.setVolume(leftVol,rightVol);
-        Log.d(TAG, "onSensorChanged: volume");
+        Log.d(TAG, "onSensorChanged: volume" );
+        Log.d(TAG, String.valueOf(dest.getBearing()));
+
 
 
 
@@ -258,16 +266,9 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                         if (location == null) {
                             requestNewLocationData();
                         } else {
+                            latitudeTextView.setText(location.getLatitude() + "");
+                            longitudeTextView.setText(location.getLongitude() + "");
 
-                            requestNewLocationData();
-                            //.-----dynamic location update text----.///
-                            latitudeTextView.setText("Latitude: " + location.getLatitude() + "");
-                            longitudeTextView.setText("Longitude: " + location.getLongitude() + "");
-
-                            //.--dynamic distance update text -...////
-                            distanceTextView.setText("Distance (m):" +(float) getDistance(location, dest)+"");
-                            //.--dynamic altitude update text --..////
-                            altitudeTextView.setText("altitude " + location.getAltitude() + "" );
                             
                         }
                     }
@@ -345,16 +346,18 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     }
 
 
-
+////helper funks///////////////////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     ///create dummy destination that sits in for server call for dest
     //return destination
     private Location getDest(){
 
-        Location destination = new Location("destination");
+        Location destination = new Location("");
 
-        destination.setLatitude(44.4860100);
-        destination.setLongitude(-73.2137600);
+//west of me => 44.484869171461725, -73.23584437166608
+        destination.setLatitude(44.484869171461725);
+        destination.setLongitude(-73.23584437166608);
         return destination;
     }
 
@@ -365,6 +368,8 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         return distance;
 
     }
+
+
 }
 
 
