@@ -49,25 +49,7 @@
 
     //Distance
 
-    <TextView
-        android:id="@+id/distanceTextView"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Distance will be here! "
-        android:textStyle="normal|bold"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/lonTextView" />
 
-    <TextView
-        android:id="@+id/altitudeTextView"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Altitude will be here!"
-        android:textStyle="normal|bold"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/distanceTextView" />
 
     <TextView
         android:id="@+id/relativeBearingTextView"
@@ -77,7 +59,7 @@
         android:textStyle="normal|bold"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/altitudeTextView" />
+        app:layout_constraintTop_toBottomOf="@+id/lonTextView" />
 
     //Compass
 
@@ -123,7 +105,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.757"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/altitudeTextView"
+        app:layout_constraintTop_toBottomOf="@+id/relativeBearingTextView"
         app:layout_constraintVertical_bias="0.248" />
 
 

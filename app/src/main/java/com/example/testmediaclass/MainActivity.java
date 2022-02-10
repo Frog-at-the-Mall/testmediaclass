@@ -76,7 +76,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     MediaPlayer player;
 
     ///init dummy destination
-    Location dest = getDest();
+    Location destination = getDest();
 
 
     //implementing volley
@@ -185,7 +185,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         float degree = Math.round(event.values[0]);
 
         headingTextView.setText("Heading: " + Float.toString(degree) + " degrees" );
-
+        getLastLocation();
 
         ///get the bearing with Location.bearingTo(Loc dest)
 
@@ -218,15 +218,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
         player.setVolume(leftVol,rightVol);
         Log.d(TAG, "onSensorChanged: volume" );
-        Log.d(TAG, String.valueOf(dest.getBearing()));
 
-
-
-
-
-        //.----add updates in here)---..///
-        //.----dynamic update location textview when sensor change (big deal method placement)---..///
-        getLastLocation();
 
         // rotation animation - reverse turn degree degrees
         RotateAnimation ra = new RotateAnimation(
@@ -268,6 +260,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                         } else {
                             latitudeTextView.setText(location.getLatitude() + "");
                             longitudeTextView.setText(location.getLongitude() + "");
+                            relativeBearingTextView.setText(location.bearingTo(destination) + 360 + "");
 
                             
                         }
@@ -308,6 +301,8 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
             Location mLastLocation = locationResult.getLastLocation();
             latitudeTextView.setText("Latitude: " + mLastLocation.getLatitude() + "");
             longitudeTextView.setText("Longitude: " + mLastLocation.getLongitude() + "");
+            relativeBearingTextView.setText(mLastLocation.bearingTo(destination) + "");
+
         }
     };
 
@@ -355,21 +350,25 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
         Location destination = new Location("");
 
-//west of me => 44.484869171461725, -73.23584437166608
+        //west of me => 44.484869171461725, -73.23584437166608
         destination.setLatitude(44.484869171461725);
         destination.setLongitude(-73.23584437166608);
         return destination;
     }
 
-    //get distance from dest
-    private float getDistance(Location current, Location destination){
-
-        float distance = current.distanceTo(destination);
-        return distance;
-
+    //using math to get relative bearing
+    //
+    private float getRelativeBearing(Location mCurrentLocation, Location dest, float heading){
+        float relativeBearing = 0;
+        return relativeBearing;
     }
+
+    //
 
 
 }
+
+
+
 
 
