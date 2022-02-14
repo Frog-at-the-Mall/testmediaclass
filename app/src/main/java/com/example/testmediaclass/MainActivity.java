@@ -11,6 +11,7 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.hardware.GeomagneticField;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
@@ -42,10 +43,12 @@ import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationCallback;
+import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationResult;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 
 import java.io.IOException;
@@ -76,7 +79,9 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     MediaPlayer player;
 
     ///init dummy destination
+
     Location destination = getDest();
+    Location mLocation;
 
 
     //implementing volley
@@ -85,7 +90,14 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     }
     RequestQueue mQueue;
 
+    //testing for geomagfield to get true north
+    private GeomagneticField mGeomagneticField;
 
+
+
+
+
+    @SuppressLint("MissingPermission")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -94,6 +106,17 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         // instance your android device sensor capabilities
         SensorManage = (SensorManager) getSystemService(SENSOR_SERVICE);
         mFusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
+        mFusedLocationClient.getLastLocation().addOnSuccessListener(this, new OnSuccessListener<Location>() {
+            @Override
+            public void onSuccess(Location location) {
+
+                if(location != null) {
+                    mLocation = location;
+                }else{
+                    mLocation = null;
+                }
+            }
+        });
 
 
         //.----gps & compass textview instancing -----..///
@@ -115,8 +138,10 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         final Button btn2 = (Button) findViewById(R.id.btn2);
         final TextView textView = (TextView) findViewById(R.id.textView);
 
+        //////////////////////////////////////////////////////////////////////////////////////
+        //volley stuffs
+        /////////////////////////////////////////////////////////////////////////////////////
         mQueue = Volley.newRequestQueue(this);
-
 
         //click button start request
         btn1.setOnClickListener(view -> {
@@ -157,10 +182,10 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         mQueue.add(stringRequest2);
     }
 
-
-
 ////////////////////////////////////////////////////////////////////////////
-    //compass methods
+////////////////////////////////////////////////////////////////////////////
+
+     //compass methods
     @Override
     protected void onPause() {
         super.onPause();
@@ -183,11 +208,14 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     public void onSensorChanged(SensorEvent event) {
         // get angle around the z-axis rotated
         float degree = Math.round(event.values[0]);
+        float trueDegree = Math.round(computeTrueNorth(degree));
 
-        headingTextView.setText("Heading: " + Float.toString(degree) + " degrees" );
+
+        headingTextView.setText("Heading: " + Float.toString(trueDegree) + " degrees" );
+        relativeBearingTextView.setText("Relative bearing: " + Float.toString(mLocation.bearingTo(destination) + 360 - trueDegree));
         getLastLocation();
 
-        ///get the bearing with Location.bearingTo(Loc dest)
+
 
         //connecting media player to degrees from north
         //setting volume
@@ -223,7 +251,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         // rotation animation - reverse turn degree degrees
         RotateAnimation ra = new RotateAnimation(
                 DegreeStart,
-                -degree,
+                -trueDegree,
                 Animation.RELATIVE_TO_SELF, 0.5f,
                 Animation.RELATIVE_TO_SELF, 0.5f);
         // set the compass animation after the end of the reservation status
@@ -232,7 +260,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         ra.setDuration(210);
         // Start animation of compass image
         compassImage.startAnimation(ra);
-        DegreeStart = -degree;
+        DegreeStart = -trueDegree;
     }
 
     @Override
@@ -258,11 +286,14 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                         if (location == null) {
                             requestNewLocationData();
                         } else {
+
+                            mGeomagneticField = new GeomagneticField((float)location.getLatitude(),(float)location.getLongitude(),(float)location.getAltitude(), System.currentTimeMillis());
                             latitudeTextView.setText(location.getLatitude() + "");
                             longitudeTextView.setText(location.getLongitude() + "");
-                            relativeBearingTextView.setText(location.bearingTo(destination) + 360 + "");
+                           // relativeBearingTextView.setText(location.bearingTo(destination) + (360) + "");
 
-                            
+
+
                         }
                     }
                 });
@@ -299,9 +330,11 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         @Override
         public void onLocationResult(LocationResult locationResult) {
             Location mLastLocation = locationResult.getLastLocation();
+            mGeomagneticField = new GeomagneticField((float)mLastLocation.getLatitude(),(float)mLastLocation.getLongitude(),(float)mLastLocation.getAltitude(), System.currentTimeMillis());
+
             latitudeTextView.setText("Latitude: " + mLastLocation.getLatitude() + "");
             longitudeTextView.setText("Longitude: " + mLastLocation.getLongitude() + "");
-            relativeBearingTextView.setText(mLastLocation.bearingTo(destination) + "");
+           // relativeBearingTextView.setText(mLastLocation.bearingTo(destination) + 360  + "");
 
         }
     };
@@ -356,14 +389,24 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         return destination;
     }
 
-    //using math to get relative bearing
-    //
-    private float getRelativeBearing(Location mCurrentLocation, Location dest, float heading){
-        float relativeBearing = 0;
-        return relativeBearing;
+
+    /**
+     * Use the magnetic field to compute true (geographic) north from the specified heading
+     * relative to magnetic north.
+     *
+     * @param heading the heading (in degrees) relative to magnetic north
+     * @return the heading (in degrees) relative to true north
+     */
+    private float computeTrueNorth(float heading) {
+        if (mGeomagneticField != null) {
+            return heading + mGeomagneticField.getDeclination();
+        } else {
+            return heading;
+        }
     }
 
-    //
+
+
 
 
 }
